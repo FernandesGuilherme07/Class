@@ -1,48 +1,55 @@
-import logo from './logo.svg';
 import './App.css';
 import { Component } from 'react';
 
 class App extends Component {
-  constructor(props) {
-    super(props);
     
-    this.state = {
-      name: "Guilherme Fernandes",
-      counter: 0
+    state = {
+      posts: [],
+      photos: []
     };
-  }
+  
+    componentDidMount() {
+      this.loadposts();
+    }
+//https://rickandmortyapi.com/api/character'
+    loadposts = async () => {
+     
+      const postsResponse = fetch('https://jsonplaceholder.typicode.com/posts');
+      const pothosResponse = fetch('https://jsonplaceholder.typicode.com/photos');
+      
+      const [ posts, photos ] = await Promise.all(
+        [postsResponse, pothosResponse]);
 
-  handlePClick = () => {
-    this.setState({ name: 'Silvano' })
-  }
+      const postsJson = await posts.json();
+      const photosJson = await photos.json();
 
-  handleAClick = (event) => {
-    event.preventDefault();
-    const { counter } = this.state;
-    this.setState({ counter: counter + 1 });
-  }
+      const postsAndPhotos = postsJson.map((posts, index) => {
+        return { ...posts, cover: photosJson[index].url }
+    });
 
-  render() {
-    const { name, counter } = this.state;
+      this.setState({ posts: postsAndPhotos });
+
+    }
+      render () {
+    const { posts } = this.state;
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p onclick={this.handlePClick}>
-          {name} {counter}
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <section className="container">
+    <div className="cards">
+   
+      {posts.map(posts => (   
+        <div className="card">
+          <img src={posts.cover} alt={posts.title}/>
+          <div key={posts.id} 
+          className="post-content">
+            <h1>{posts.title}</h1>
+            <p>{posts.body}</p>
+          </div>
+        </div>
+      ))}
     </div>
-  );
+    </section>
+  )
   }
 }
 
